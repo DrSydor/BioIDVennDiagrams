@@ -33,7 +33,10 @@ my_file.write(f"Common hits between the {file1} and {file2} Datasets\n")
 common = set(f1_striped) & set(f2_striped)
 
 # Write the results to file
-for line in common:
+common_sorted = list(common)
+common_sorted.sort()
+
+for line in common_sorted:
     my_file.write(line + "\n")
 
 my_file.write(f"\nThere are a total of {len(common)} proteins common between the two datasets.")

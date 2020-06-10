@@ -24,11 +24,9 @@ with open(file1 + ".txt") as f1:
             a,b =  line.strip().split()
             dict1[a].append(b)
 
-print(dict1)
-
-f2=open(file2 + ".txt")
-f2_contents = f2.readlines()
-f2_striped = [item.rstrip("\n") for item in f2_contents]
+with open(file2 + ".txt") as f2:
+    f2_contents = f2.readlines()
+    f2_striped = [item.rstrip("\n") for item in f2_contents]
 
 # Creating a new text file for outputting the results
 my_file = open("Common hits- " + file1 + " v " + file2 + ".txt", "w")
@@ -57,5 +55,3 @@ for key in dict1.keys():
 
 # Close files
 my_file.close()    
-f1.close()
-f2.close()

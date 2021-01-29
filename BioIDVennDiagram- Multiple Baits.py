@@ -5,7 +5,7 @@ Created on Sat Sept 5 2020
 To compare a BioID Dataset with multiple baits to one with a single bait and 
 generate Venn Diagrams comparing the two datasets. This script accepts .txt 
 files where each line has a separate bait-prey interaction listed. Saves the
-resulting Venn Diagrams and list of common proteins as a PDF file.
+resulting Venn Diagrams and list of common proteins as a PDF file. (V5)
 
 """
 import pylab as plt
@@ -13,7 +13,7 @@ from matplotlib_venn import venn2
 from collections import defaultdict
 from matplotlib.backends.backend_pdf import PdfPages
 
-def retFig(key):
+def retFig(key, key2):
     '''
     This function will find all the common proteins between the two BioID
     datasets and return a figure containing both a venn diagram of the common
@@ -22,7 +22,7 @@ def retFig(key):
 
     '''
     # Identification of the common proteins between the two datasets
-    common = set(dict1[key]) & set(f2_striped)
+    common = set(dict1[key]) & set(dict2[key2])
     common_sorted = list(common)
     common_sorted.sort()
     figtxt = " "
@@ -30,10 +30,11 @@ def retFig(key):
     
     # Generation of the Venn diagram
     c = plt.figure(figsize=(10,10))
-    plt.title("Comparing " + key + " vs " + file2 + " BioID Datasets:", fontname="Helvetica", fontsize=18, fontweight='bold')
+    plt.title("Comparing " + key + " vs " + key2 + " BioID Datasets:", fontname="Helvetica", fontsize=18, fontweight='bold')
     txt = "There are a total of " + str(len(common)) + " proteins common between the two datasets.\n Common: " + TextWrap(figtxt2, 70)
     plt.text(0.05,0.07,txt, transform=c.transFigure, size=10)
-    venn2([set(dict1[key]), set(f2_striped)], set_labels = (key, file2))
+    venn2([set(dict1[key]), set(dict2[key2])], set_labels = (key, key2))
+    plt.close()
     return c
 
 def TextWrap(string, txt_len):
@@ -57,7 +58,13 @@ def TextWrap(string, txt_len):
     original string length is more than the desired length (given by txt_len).
     '''
     while stri_len > txt_len:
-        if string[n] == " ":
+        print(key)
+        print(key2)
+        print(n)
+        if n >= len(string):
+            stri_wrap += string[0:n+1]
+            break
+        elif string[n] == " ":
             stri_wrap += string[0:n+1]
             stri_wrap += "\n"
             string = string[n:]
@@ -72,20 +79,23 @@ def TextWrap(string, txt_len):
     return stri_wrap
          
 # Opening and reading the files; DO NOT INCLUDE FILE EXTENSIONS
-file1 = "OSBPLBioID2"   # File name of file 1 (multiple baits)
-file2 = "ER-Mitochondria MCS"    # File name of file 2
+file1 = "File_Name1"   # File name of file 1 (multiple baits)
+file2 = "File_Name2"    # File name of file 2
 
 dict1 = defaultdict(list)
+dict2 = defaultdict(list)
 
 with open(file1 + ".txt") as f1:
     for line in f1:
         if line.strip():
             a,b =  line.strip().split()
             dict1[a].append(b)
-
-f2=open(file2 + ".txt")
-f2_contents = f2.readlines()
-f2_striped = [item.rstrip("\n") for item in f2_contents]
+            
+with open(file2 + ".txt") as f2:
+    for line in f2:
+        if line.strip():
+            a,b =  line.strip().split()
+            dict2[a].append(b)
 
 # Creating a new pdf file for outputting the results
 filename = "Common hits- " + file1 + " v " + file2 + ".pdf"
@@ -93,7 +103,8 @@ pdf = PdfPages(filename)
 
 # Generate the Venn Diagrams and save to PDF
 for key in dict1.keys():
-    pdf.savefig(retFig(key))
+    for key2 in dict2.keys():
+        pdf.savefig(retFig(key, key2))
 
 # Close files
 pdf.close()
